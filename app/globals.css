@@ -1,0 +1,44 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  font-family: 'Inter', sans-serif;
+}
+
+/* Tier colors */
+.tier-S { color: #facc15; }
+.tier-A { color: #c084fc; }
+.tier-B { color: #f87171; }
+.tier-C { color: #60a5fa; }
+.tier-D { color: #4ade80; }
+.tier-E { color: #9ca3af; }
+
+/* Rarity badges */
+.rarity-S { background: #facc15; color: #000; }
+.rarity-A { background: #c084fc; color: #fff; }
+.rarity-B { background: #f87171; color: #fff; }
+.rarity-C { background: #60a5fa; color: #fff; }
+.rarity-D { background: #4ade80; color: #fff; }
+.rarity-E { background: #9ca3af; color: #fff; }
+.rarity-all { background: #444; color: #fff; }
+
+/* Animations */
+.fade-in {
+  animation: fadeIn 0.25s ease-out;
+}
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 8px; }
+::-webkit-scrollbar-track { background: #1a1a1a; }
+::-webkit-scrollbar-thumb { background: #444; border-radius: 4px; }
+
+/* Number input spinners */
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+  opacity: 1;
+}

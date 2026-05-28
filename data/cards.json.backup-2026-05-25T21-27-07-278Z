@@ -1,0 +1,34 @@
+{
+  "cards": [
+    {
+      "id": 670,
+      "name_cn": "致命涡流-终",
+      "name_vn": "Cực Lưu Chí Mạng - Chung",
+      "rarity": "S",
+      "description": "适用种族: 二代海鲜",
+      "description_vn": "Chủng tộc áp dụng: Hải sản đời 2",
+      "pet_usable": "二代海鲜",
+      "pet_usable_vn": "Hải sản đời 2",
+      "cost": 2.00,
+      "sp_cost": 72,
+      "attack_point_cost": 26,
+      "min_level": 60,
+      "cooldown": 5,
+      "warmup": 2,
+      "refinement": 0,
+      "attack_attribute": "水",
+      "attack_attribute_vn": "Thủy",
+      "attack_domain": "光",
+      "attack_domain_vn": "Quang",
+      "attack_range": "特定宠物",
+      "attack_range_vn": "Thú cưng cụ thể",
+      "cast_method": "主动技能",
+      "cast_method_vn": "Kỹ năng chủ động",
+      "phantom_side_effect": -30,
+      "map_effect": -30,
+      "skill_effect": "满水效果：产生巨大的水属性旋涡，对敌方两个相邻的棋子内（从左到右）的每个产生50点额外攻击，如果棋子内有甲乙和超过自身HP500%以上，还能产生300-800点加防直接伤害，并有15%几率造成对方感染病毒持续3回合",
+      "skill_effect_vn": "Hiệu ứng Thủy tối đa: Tạo ra một vòng xoáy thuộc tính nước khổng lồ, gây thêm 50 điểm tấn công cho mỗi đơn vị trong hai ô kề nhau của đối phương (từ trái sang phải). Nếu tổng giáp trong ô vượt quá 500% HP bản thân, còn gây thêm 300-800 sát thương trực tiếp cộng phòng thủ, và có 15% tỷ lệ gây nhiễm virus cho đối phương kéo dài 3 lượt.",
+      "image": ""
+    }
+  ]
+}

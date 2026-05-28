@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Game Helper Tool</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet" />
+  <style>
+    body { font-family: 'Inter', sans-serif; }
+    .tier-S { color: #facc15; }
+    .tier-A { color: #c084fc; }
+    .tier-B { color: #f87171; }
+    .tier-C { color: #60a5fa; }
+    .tier-D { color: #4ade80; }
+    .tier-E { color: #9ca3af; }
+    input[type="number"]::-webkit-inner-spin-button,
+    input[type="number"]::-webkit-outer-spin-button { opacity: 1; }
+    .fade-in { animation: fadeIn 0.25s ease-out; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+  </style>
+</head>
+<body class="bg-gray-950 text-gray-100 min-h-screen">
+
+  <!-- MENU VIEW -->
+  <div id="menu-view" class="fade-in max-w-3xl mx-auto px-6 py-12">
+    <div class="text-center mb-10">
+      <h1 class="text-4xl font-bold bg-gradient-to-r from-blue-400 to-emerald-400 bg-clip-text text-transparent mb-2">Game Helper Tool</h1>
+      <p class="text-gray-400">A collection of utilities to make your gaming life easier.</p>
+    </div>
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+      <!-- Feature: Card Creation Helper -->
+      <button onclick="showFeature('card-helper')" class="group relative bg-gray-900 border border-gray-800 hover:border-blue-500 rounded-xl p-6 text-left transition-all hover:shadow-lg hover:shadow-blue-900/20 hover:-translate-y-0.5">
+        <div class="text-3xl mb-3">🃏</div>
+        <h3 class="text-lg font-semibold text-white mb-1 group-hover:text-blue-400 transition-colors">Card Creation Helper</h3>
+        <p class="text-sm text-gray-400">Calculate how many base materials you need to buy to craft your target card.</p>
+        <div class="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity text-blue-400">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" /></svg>
+        </div>
+      </button>
+
+      <!-- Feature: Card Viewer -->
+      <a href="card-viewer.html" class="group relative bg-gray-900 border border-gray-800 hover:border-purple-500 rounded-xl p-6 text-left transition-all hover:shadow-lg hover:shadow-purple-900/20 hover:-translate-y-0.5 block">
+        <div class="text-3xl mb-3">🃏</div>
+        <h3 class="text-lg font-semibold text-white mb-1 group-hover:text-purple-400 transition-colors">Card Viewer</h3>
+        <p class="text-sm text-gray-400">Tra cứu và xem chi tiết các thẻ bài trong game.</p>
+        <div class="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity text-purple-400">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" /></svg>
+        </div>
+      </a>
+
+      <!-- Feature: Card Editor -->
+      <a href="card-editor.html" class="group relative bg-gray-900 border border-gray-800 hover:border-emerald-500 rounded-xl p-6 text-left transition-all hover:shadow-lg hover:shadow-emerald-900/20 hover:-translate-y-0.5 block">
+        <div class="text-3xl mb-3">✏️</div>
+        <h3 class="text-lg font-semibold text-white mb-1 group-hover:text-emerald-400 transition-colors">Card Editor</h3>
+        <p class="text-sm text-gray-400">Thêm và chỉnh sửa thông tin thẻ bài.</p>
+        <div class="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity text-emerald-400">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" /></svg>
+        </div>
+      </a>
+    </div>
+  </div>
+
+  <!-- CARD CREATION HELPER VIEW -->
+  <div id="card-helper-view" class="hidden fade-in max-w-6xl mx-auto px-4 py-8">
+    <!-- Header -->
+    <div class="flex items-center gap-4 mb-8">
+      <button onclick="showMenu()" class="flex items-center gap-2 px-4 py-2 bg-gray-800 hover:bg-gray-700 rounded-lg text-sm font-medium transition-colors border border-gray-700">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clip-rule="evenodd" /></svg>
+        Back to Menu
+      </button>
+      <h2 class="text-2xl font-bold text-white">Card Creation Helper</h2>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+      <!-- Left Column: Inputs (7 cols) -->
+      <div class="lg:col-span-7 space-y-6">
+        <!-- Required -->
+        <div class="bg-gray-900 border border-gray-800 rounded-xl p-5">
+          <div class="flex items-center justify-between mb-4">
+            <h3 class="text-lg font-semibold text-white flex items-center gap-2">
+              <span>📋</span> Card Recipe <span class="text-xs font-normal text-gray-500 ml-2">(What the card needs)</span>
+            </h3>
+            <button onclick="clearInputs('req')" class="text-xs text-gray-500 hover:text-white underline">Clear</button>
+          </div>
+          <div class="space-y-3" id="req-inputs"></div>
+        </div>
+
+        <!-- Owned -->
+        <div class="bg-gray-900 border border-gray-800 rounded-xl p-5">
+          <div class="flex items-center justify-between mb-4">
+            <h3 class="text-lg font-semibold text-white flex items-center gap-2">
+              <span>🎒</span> Your Inventory <span class="text-xs font-normal text-gray-500 ml-2">(What you already have)</span>
+            </h3>
+            <button onclick="clearInputs('own')" class="text-xs text-gray-500 hover:text-white underline">Clear</button>
+          </div>
+          <div class="space-y-3" id="own-inputs"></div>
+        </div>
+
+        <!-- Price Reference -->
+        <div class="bg-gray-900 border border-gray-800 rounded-xl p-5">
+          <h3 class="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+            <span>💰</span> Price Reference
+          </h3>
+          <div class="grid grid-cols-2 sm:grid-cols-3 gap-3 text-sm">
+            <div class="bg-gray-950 border border-gray-800 rounded-lg p-3 flex items-center justify-between">
+              <span class="font-bold tier-E text-lg">E</span>
+              <span class="text-gray-300 flex items-center gap-1">50<img src="images/currency/silver.png" alt="silver" class="inline-block h-3.5 w-3.5"></span>
+            </div>
+            <div class="bg-gray-950 border border-gray-800 rounded-lg p-3 flex items-center justify-between">
+              <span class="font-bold tier-D text-lg">D</span>
+              <span class="text-gray-300 flex items-center gap-1">1<img src="images/currency/gold.png" alt="gold" class="inline-block h-3.5 w-3.5"> 90<img src="images/currency/silver.png" alt="silver" class="inline-block h-3.5 w-3.5"></span>
+            </div>
+            <div class="bg-gray-950 border border-gray-800 rounded-lg p-3 flex items-center justify-between">
+              <span class="font-bold tier-C text-lg">C</span>
+              <span class="text-gray-500 text-xs">not sold</span>
+            </div>
+            <div class="bg-gray-950 border border-gray-800 rounded-lg p-3 flex items-center justify-between">
+              <span class="font-bold tier-B text-lg">B</span>
+              <span class="text-gray-500 text-xs">not sold</span>
+            </div>
+            <div class="bg-gray-950 border border-gray-800 rounded-lg p-3 flex items-center justify-between">
+              <span class="font-bold tier-A text-lg">A</span>
+              <span class="text-gray-500 text-xs">not sold</span>
+            </div>
+            <div class="bg-gray-950 border border-gray-800 rounded-lg p-3 flex items-center justify-between">
+              <span class="font-bold tier-S text-lg">S</span>
+              <span class="text-gray-500 text-xs">not sold</span>
+            </div>
+          </div>
+          <div class="mt-4 pt-3 border-t border-gray-800 grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs text-gray-400">
+            <div class="flex items-center gap-1">🔧 <strong class="text-gray-300">E → D</strong> combine: <span class="text-emerald-400">Free</span></div>
+            <div class="flex items-center gap-1">🔧 <strong class="text-gray-300">D → C</strong> combine: <span class="text-amber-400 flex items-center gap-1">50<img src="images/currency/silver.png" alt="silver" class="inline-block h-3 w-3"></span></div>
+            <div class="flex items-center gap-1">🔧 <strong class="text-gray-300">C → B</strong> combine: <span class="text-amber-400 flex items-center gap-1">2<img src="images/currency/gold.png" alt="gold" class="inline-block h-3 w-3"></span></div>
+            <div class="flex items-center gap-1">🔧 <strong class="text-gray-300">B → A</strong> combine: <span class="text-amber-400 flex items-center gap-1">10<img src="images/currency/gold.png" alt="gold" class="inline-block h-3 w-3"></span></div>
+            <div class="flex items-center gap-1">🔧 <strong class="text-gray-300">A → S</strong> combine: <span class="text-amber-400 flex items-center gap-1">50<img src="images/currency/gold.png" alt="gold" class="inline-block h-3 w-3"></span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right Column: Result (5 cols) -->
+      <div class="lg:col-span-5 space-y-6">
+        <div class="bg-gray-900 border border-gray-800 rounded-xl p-6 sticky top-6">
+          <h3 class="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+            <span>🧮</span> Result
+          </h3>
+
+          <!-- Toggle -->
+          <div class="flex items-center justify-between mb-5 bg-gray-800 rounded-lg p-1">
+            <span class="text-sm text-gray-400 pl-3">Display unit:</span>
+            <div class="flex bg-gray-950/50 rounded-md p-0.5">
+              <button id="btn-mode-E" onclick="setMode('E')" class="px-4 py-1.5 text-sm font-medium rounded-md transition-all text-gray-400 hover:text-white">E</button>
+              <button id="btn-mode-D" onclick="setMode('D')" class="px-4 py-1.5 text-sm font-medium rounded-md transition-all bg-blue-600 text-white shadow">D</button>
+            </div>
+          </div>
+
+          <!-- Big Number -->
+          <div class="text-center py-5 bg-gray-950/40 rounded-xl border border-gray-800/50 mb-5">
+            <div id="result-number" class="text-5xl font-bold text-emerald-400 tracking-tight">0</div>
+            <div id="result-label" class="text-sm text-gray-400 mt-2 font-medium uppercase tracking-wide">E needed to buy</div>
+          </div>
+
+          <!-- Cost Breakdown -->
+          <div id="cost-breakdown" class="space-y-3 mb-5">
+            <div class="flex items-center justify-between py-2 px-3 bg-gray-950/30 rounded-lg border border-gray-800/50">
+              <span class="text-sm text-gray-400">Ingredient Cost</span>
+              <span id="cost-ingredients" class="text-sm font-semibold text-white">0s</span>
+            </div>
+            <div class="flex items-center justify-between py-2 px-3 bg-gray-950/30 rounded-lg border border-gray-800/50">
+              <span class="text-sm text-gray-400">Combine Cost</span>
+              <span id="cost-combine" class="text-sm font-semibold text-amber-400">0s</span>
+            </div>
+            <div class="flex items-center justify-between py-3 px-3 bg-emerald-950/20 rounded-lg border border-emerald-900/30">
+              <span class="text-sm font-semibold text-emerald-300">Total Cost</span>
+              <span id="cost-total" class="text-lg font-bold text-emerald-400">0s</span>
+            </div>
+          </div>
+
+          <!-- Steps -->
+          <div id="steps-container" class="hidden mt-2 pt-3 border-t border-gray-800">
+            <h4 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Calculation Steps</h4>
+            <div id="steps-list" class="space-y-1.5 text-xs text-gray-400 font-mono"></div>
+          </div>
+
+          <button onclick="toggleSteps()" id="btn-toggle-steps" class="w-full mt-2 py-2 text-xs text-gray-500 hover:text-blue-400 transition-colors flex items-center justify-center gap-1">
+            <span>Show calculation steps</span>
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 transition-transform" id="steps-chevron" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" /></svg>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const TIERS = [
+      { key: 'S', label: 'S', index: 5, cls: 'tier-S' },
+      { key: 'A', label: 'A', index: 4, cls: 'tier-A' },
+      { key: 'B', label: 'B', index: 3, cls: 'tier-B' },
+      { key: 'C', label: 'C', index: 2, cls: 'tier-C' },
+      { key: 'D', label: 'D', index: 1, cls: 'tier-D' },
+      { key: 'E', label: 'E', index: 0, cls: 'tier-E' },
+    ];
+
+    // Prices in silver (100 silver = 1 gold)
+    const PRICE_E = 50;
+    const PRICE_D = 190; // 1g 90s
+
+    // Combine costs in silver
+    const COMBINE_COSTS = {
+      S: 5000, // A→S: 50g
+      A: 1000, // B→A: 10g
+      B: 200,  // C→B: 2g
+      C: 50,   // D→C: 50s
+      D: 0,    // E→D: free
+    };
+
+    let displayMode = 'D';
+    let stepsVisible = false;
+
+    function init() {
+      const reqContainer = document.getElementById('req-inputs');
+      const ownContainer = document.getElementById('own-inputs');
+      TIERS.forEach(t => {
+        reqContainer.appendChild(createRow(t, 'req'));
+        ownContainer.appendChild(createRow(t, 'own'));
+      });
+      calculate();
+    }
+
+    function createRow(tier, prefix) {
+      const div = document.createElement('div');
+      div.className = 'flex items-center gap-3';
+      div.innerHTML = `
+        <div class="w-8 text-center font-bold text-lg ${tier.cls}">${tier.label}</div>
+        <input
+          type="number"
+          id="${prefix}-${tier.label}"
+          min="0"
+          oninput="this.value = this.value.replace(/^0+(?=\d)/, ''); calculate()"
+          class="flex-1 bg-gray-950 border border-gray-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all"
+          placeholder="0"
+        />
+      `;
+      return div;
+    }
+
+    function clearInputs(prefix) {
+      TIERS.forEach(t => {
+        document.getElementById(`${prefix}-${t.label}`).value = '';
+      });
+      calculate();
+    }
+
+    function setMode(mode) {
+      displayMode = mode;
+      document.getElementById('btn-mode-E').className = mode === 'E'
+        ? 'px-4 py-1.5 text-sm font-medium rounded-md transition-all bg-blue-600 text-white shadow'
+        : 'px-4 py-1.5 text-sm font-medium rounded-md transition-all text-gray-400 hover:text-white';
+      document.getElementById('btn-mode-D').className = mode === 'D'
+        ? 'px-4 py-1.5 text-sm font-medium rounded-md transition-all bg-blue-600 text-white shadow'
+        : 'px-4 py-1.5 text-sm font-medium rounded-md transition-all text-gray-400 hover:text-white';
+      calculate();
+    }
+
+    function toggleSteps() {
+      stepsVisible = !stepsVisible;
+      const el = document.getElementById('steps-container');
+      const chevron = document.getElementById('steps-chevron');
+      const btnText = document.querySelector('#btn-toggle-steps span');
+      if (stepsVisible) {
+        el.classList.remove('hidden');
+        btnText.textContent = 'Hide calculation steps';
+        chevron.style.transform = 'rotate(180deg)';
+      } else {
+        el.classList.add('hidden');
+        btnText.textContent = 'Show calculation steps';
+        chevron.style.transform = 'rotate(0deg)';
+      }
+    }
+
+    function formatCurrency(silver) {
+      const goldImg = '<img src="images/currency/gold.png" alt="gold" class="inline-block h-3.5 w-3.5 align-middle -mt-0.5 mx-0.5">';
+      const silverImg = '<img src="images/currency/silver.png" alt="silver" class="inline-block h-3.5 w-3.5 align-middle -mt-0.5 mx-0.5">';
+      if (silver === 0) return `0${silverImg}`;
+      const gold = Math.floor(silver / 100);
+      const silv = silver % 100;
+      const parts = [];
+      if (gold > 0) parts.push(`${gold}${goldImg}`);
+      if (silv > 0) parts.push(`${silv}${silverImg}`);
+      return parts.join(' ');
+    }
+
+    function getVal(prefix, label) {
+      return Math.max(0, parseInt(document.getElementById(`${prefix}-${label}`).value) || 0);
+    }
+
+    function calculate() {
+      const req = {};
+      const own = {};
+      TIERS.forEach(t => {
+        req[t.label] = getVal('req', t.label);
+        own[t.label] = getVal('own', t.label);
+      });
+
+      // Propagate deficits downward: S → A → B → C → D → E
+      const need = { ...req };
+      const deficits = {};
+      const steps = [];
+
+      // S (index 5)
+      deficits.S = Math.max(0, need.S - own.S);
+      if (deficits.S > 0) {
+        need.A += deficits.S * 4;
+        steps.push(`<span class="${TIERS[0].cls}">S</span>: Need <strong>${deficits.S}</strong> more → requires <strong>${deficits.S * 4}</strong> A (combine: ${formatCurrency(deficits.S * COMBINE_COSTS.S)})`);
+      } else {
+        steps.push(`<span class="${TIERS[0].cls}">S</span>: Have ${own.S}, Need ${need.S}. <span class="text-gray-500">OK</span>`);
+      }
+
+      // A (index 4)
+      deficits.A = Math.max(0, need.A - own.A);
+      if (deficits.A > 0) {
+        need.B += deficits.A * 4;
+        steps.push(`<span class="${TIERS[1].cls}">A</span>: Need <strong>${deficits.A}</strong> more → requires <strong>${deficits.A * 4}</strong> B (combine: ${formatCurrency(deficits.A * COMBINE_COSTS.A)})`);
+      } else {
+        steps.push(`<span class="${TIERS[1].cls}">A</span>: Have ${own.A}, Need ${need.A}. <span class="text-gray-500">OK</span>`);
+      }
+
+      // B (index 3)
+      deficits.B = Math.max(0, need.B - own.B);
+      if (deficits.B > 0) {
+        need.C += deficits.B * 4;
+        steps.push(`<span class="${TIERS[2].cls}">B</span>: Need <strong>${deficits.B}</strong> more → requires <strong>${deficits.B * 4}</strong> C (combine: ${formatCurrency(deficits.B * COMBINE_COSTS.B)})`);
+      } else {
+        steps.push(`<span class="${TIERS[2].cls}">B</span>: Have ${own.B}, Need ${need.B}. <span class="text-gray-500">OK</span>`);
+      }
+
+      // C (index 2)
+      deficits.C = Math.max(0, need.C - own.C);
+      if (deficits.C > 0) {
+        need.D += deficits.C * 4;
+        steps.push(`<span class="${TIERS[3].cls}">C</span>: Need <strong>${deficits.C}</strong> more → requires <strong>${deficits.C * 4}</strong> D (combine: ${formatCurrency(deficits.C * COMBINE_COSTS.C)})`);
+      } else {
+        steps.push(`<span class="${TIERS[3].cls}">C</span>: Have ${own.C}, Need ${need.C}. <span class="text-gray-500">OK</span>`);
+      }
+
+      // D (index 1)
+      deficits.D = Math.max(0, need.D - own.D);
+      if (deficits.D > 0) {
+        need.E += deficits.D * 4;
+        steps.push(`<span class="${TIERS[4].cls}">D</span>: Need <strong>${deficits.D}</strong> more → requires <strong>${deficits.D * 4}</strong> E (combine: ${formatCurrency(deficits.D * COMBINE_COSTS.D)})`);
+      } else {
+        steps.push(`<span class="${TIERS[4].cls}">D</span>: Have ${own.D}, Need ${need.D}. <span class="text-gray-500">OK</span>`);
+      }
+
+      // E (index 0)
+      deficits.E = Math.max(0, need.E - own.E);
+      if (deficits.E > 0) {
+        steps.push(`<span class="${TIERS[5].cls}">E</span>: Have ${own.E}, Need ${need.E}. Must buy: <strong class="text-emerald-400">${deficits.E}</strong> E`);
+      } else {
+        steps.push(`<span class="${TIERS[5].cls}">E</span>: Have ${own.E}, Need ${need.E}. <span class="text-gray-500">OK</span>`);
+      }
+
+      // Calculate purchase cost based on display mode
+      let purchaseCost = 0;
+      let buyD = 0;
+      let buyE = deficits.E;
+
+      if (displayMode === 'E') {
+        purchaseCost = buyE * PRICE_E;
+      } else {
+        buyD = Math.floor(buyE / 4);
+        buyE = buyE % 4;
+        purchaseCost = buyD * PRICE_D + buyE * PRICE_E;
+      }
+
+      // Calculate combine cost (always based on actual deficits)
+      let combineCost = 0;
+      combineCost += deficits.S * COMBINE_COSTS.S;
+      combineCost += deficits.A * COMBINE_COSTS.A;
+      combineCost += deficits.B * COMBINE_COSTS.B;
+      combineCost += deficits.C * COMBINE_COSTS.C;
+      combineCost += deficits.D * COMBINE_COSTS.D;
+
+      const totalCost = purchaseCost + combineCost;
+
+      // Render result number
+      const numEl = document.getElementById('result-number');
+      const labelEl = document.getElementById('result-label');
+
+      if (displayMode === 'E') {
+        numEl.textContent = deficits.E;
+        labelEl.textContent = deficits.E === 1 ? 'E Ingredient to Buy' : 'E Ingredients to Buy';
+      } else {
+        const d = Math.floor(deficits.E / 4);
+        const e = deficits.E % 4;
+        if (d === 0 && e === 0) {
+          numEl.textContent = '0';
+          labelEl.textContent = 'Nothing to Buy';
+        } else if (e === 0) {
+          numEl.textContent = d;
+          labelEl.textContent = d === 1 ? 'D Ingredient to Buy' : 'D Ingredients to Buy';
+        } else if (d === 0) {
+          numEl.textContent = e;
+          labelEl.textContent = e === 1 ? 'E Ingredient to Buy' : 'E Ingredients to Buy';
+        } else {
+          numEl.textContent = `${d} D + ${e} E`;
+          labelEl.textContent = 'Ingredients to Buy';
+        }
+      }
+
+      // Render costs
+      document.getElementById('cost-ingredients').innerHTML = formatCurrency(purchaseCost);
+      document.getElementById('cost-combine').innerHTML = formatCurrency(combineCost);
+      document.getElementById('cost-total').innerHTML = formatCurrency(totalCost);
+
+      // Render steps
+      document.getElementById('steps-list').innerHTML = steps.map(s => `<div class="flex gap-2">• ${s}</div>`).join('');
+    }
+
+    function showFeature(id) {
+      document.getElementById('menu-view').classList.add('hidden');
+      document.getElementById(`${id}-view`).classList.remove('hidden');
+    }
+
+    function showMenu() {
+      document.querySelectorAll('[id$="-view"]').forEach(el => {
+        if (el.id !== 'menu-view') el.classList.add('hidden');
+      });
+      document.getElementById('menu-view').classList.remove('hidden');
+    }
+
+    init();
+  </script>
+</body>
+</html>

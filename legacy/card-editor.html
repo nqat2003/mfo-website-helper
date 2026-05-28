@@ -1,0 +1,635 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Card Editor — Quản lý thẻ</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet" />
+  <style>
+    body { font-family: 'Inter', sans-serif; }
+    ::-webkit-scrollbar { width: 8px; }
+    ::-webkit-scrollbar-track { background: #1a1a1a; }
+    ::-webkit-scrollbar-thumb { background: #444; border-radius: 4px; }
+    .rarity-S { background: #facc15; color: #000; }
+    .rarity-A { background: #c084fc; color: #fff; }
+    .rarity-B { background: #f87171; color: #fff; }
+    .rarity-C { background: #60a5fa; color: #fff; }
+    .rarity-D { background: #4ade80; color: #fff; }
+    .rarity-E { background: #9ca3af; color: #fff; }
+    .fade-in { animation: fadeIn 0.25s ease-out; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+    .field-error { border-color: #ef4444 !important; }
+  </style>
+</head>
+<body class="bg-gray-950 text-gray-100 min-h-screen">
+  <div class="max-w-7xl mx-auto px-4 py-6">
+    <!-- Header -->
+    <div class="flex items-center justify-between mb-6">
+      <div class="flex items-center gap-4">
+        <a href="index.html" class="flex items-center gap-2 px-4 py-2 bg-gray-900 hover:bg-gray-800 rounded-lg text-sm font-medium transition-colors border border-gray-800">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clip-rule="evenodd" /></svg>
+          Back to Menu
+        </a>
+        <h1 class="text-xl font-bold text-white">Card Editor / Quản lý thẻ</h1>
+      </div>
+      <button onclick="exportJSON()" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 rounded-lg text-sm font-medium transition-colors flex items-center gap-2">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clip-rule="evenodd" /></svg>
+        Export JSON
+      </button>
+    </div>
+
+    <div class="flex gap-6 min-h-[calc(100vh-140px)]">
+      <!-- Left Panel: Form -->
+      <div class="w-[55%] flex-shrink-0 flex flex-col gap-4">
+        <!-- Mode Indicator -->
+        <div id="modeIndicator" class="bg-gray-900 border border-gray-800 rounded-xl p-4">
+          <h2 class="text-lg font-bold text-white" id="modeTitle">Thêm thẻ mới</h2>
+          <p class="text-sm text-gray-400" id="modeSubtitle">Điền thông tin thẻ bên dưới và nhấn Lưu.</p>
+        </div>
+
+        <!-- Error Banner -->
+        <div id="errorBanner" class="hidden bg-red-900/30 border border-red-800 rounded-xl p-3 text-red-300 text-sm"></div>
+
+        <!-- Form -->
+        <form id="cardForm" class="bg-gray-900 border border-gray-800 rounded-xl p-4 space-y-5" onsubmit="event.preventDefault(); saveCard();">
+          <input type="hidden" id="editMode" value="">
+
+          <!-- Basic Info -->
+          <div>
+            <h3 class="text-sm font-semibold text-gray-300 mb-3 uppercase tracking-wider">Thông tin cơ bản</h3>
+            <div class="grid grid-cols-2 gap-3">
+              <div class="col-span-1">
+                <label class="block text-xs text-gray-400 mb-1">ID <span class="text-red-400">*</span></label>
+                <input type="number" id="field_id" min="1" required class="w-full bg-gray-950 border border-gray-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-blue-500 transition-all" />
+              </div>
+              <div class="col-span-1">
+                <label class="block text-xs text-gray-400 mb-1">Độ hiếm <span class="text-red-400">*</span></label>
+                <select id="field_rarity" required class="w-full bg-gray-950 border border-gray-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-blue-500 transition-all">
+                  <option value="">Chọn...</option>
+                  <option value="S">S</option>
+                  <option value="A">A</option>
+                  <option value="B">B</option>
+                  <option value="C">C</option>
+                  <option value="D">D</option>
+                  <option value="E">E</option>
+                </select>
+              </div>
+              <div class="col-span-1">
+                <label class="block text-xs text-gray-400 mb-1">Số thẻ</label>
+                <input type="text" id="field_card_number" class="w-full bg-gray-950 border border-gray-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-blue-500 transition-all" />
+              </div>
+              <div class="col-span-2">
+                <label class="block text-xs text-gray-400 mb-1">Tên (Tiếng Trung) <span class="text-red-400">*</span></label>
+                <input type="text" id="field_name_cn" required class="w-full bg-gray-950 border border-gray-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-blue-500 transition-all" />
+              </div>
+              <div class="col-span-2">
+                <label class="block text-xs text-gray-400 mb-1">Tên (Tiếng Việt) <span class="text-red-400">*</span></label>
+                <input type="text" id="field_name_vn" required class="w-full bg-gray-950 border border-gray-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-blue-500 transition-all" />
+              </div>
+            </div>
+          </div>
+
+          <!-- Stats -->
+          <div>
+            <h3 class="text-sm font-semibold text-gray-300 mb-3 uppercase tracking-wider">Chỉ số</h3>
+            <div class="grid grid-cols-3 gap-3">
+              <div><label class="block text-xs text-gray-400 mb-1">Cost</label><input type="number" id="field_cost" step="0.01" value="0" class="w-full bg-gray-950 border border-gray-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-blue-500 transition-all" /></div>
+              <div><label class="block text-xs text-gray-400 mb-1">SP</label><input type="number" id="field_sp_cost" value="0" class="w-full bg-gray-950 border border-gray-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-blue-500 transition-all" /></div>
+              <div><label class="block text-xs text-gray-400 mb-1">Điểm PP</label><input type="number" id="field_attack_point_cost" value="0" class="w-full bg-gray-950 border border-gray-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-blue-500 transition-all" /></div>
+              <div><label class="block text-xs text-gray-400 mb-1">Cấp tối thiểu</label><input type="number" id="field_min_level" value="0" class="w-full bg-gray-950 border border-gray-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-blue-500 transition-all" /></div>
+              <div><label class="block text-xs text-gray-400 mb-1">Hồi chiêu</label><input type="number" id="field_cooldown" value="0" class="w-full bg-gray-950 border border-gray-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-blue-500 transition-all" /></div>
+              <div><label class="block text-xs text-gray-400 mb-1">Khởi động</label><input type="number" id="field_warmup" value="0" class="w-full bg-gray-950 border border-gray-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-blue-500 transition-all" /></div>
+            </div>
+          </div>
+
+          <!-- Attributes -->
+          <div>
+            <h3 class="text-sm font-semibold text-gray-300 mb-3 uppercase tracking-wider">Thuộc tính</h3>
+            <div class="space-y-3">
+              <div class="grid grid-cols-2 gap-3">
+                <div><label class="block text-xs text-gray-400 mb-1">Thuộc tính tấn công (CN)</label><input type="text" id="field_attack_attribute" class="w-full bg-gray-950 border border-gray-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-blue-500 transition-all" /></div>
+                <div><label class="block text-xs text-gray-400 mb-1">Thuộc tính tấn công (VN)</label><input type="text" id="field_attack_attribute_vn" class="w-full bg-gray-950 border border-gray-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-blue-500 transition-all" /></div>
+              </div>
+              <div class="grid grid-cols-2 gap-3">
+                <div><label class="block text-xs text-gray-400 mb-1">Lĩnh vực (CN)</label><input type="text" id="field_attack_domain" class="w-full bg-gray-950 border border-gray-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-blue-500 transition-all" /></div>
+                <div><label class="block text-xs text-gray-400 mb-1">Lĩnh vực (VN)</label><input type="text" id="field_attack_domain_vn" class="w-full bg-gray-950 border border-gray-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-blue-500 transition-all" /></div>
+              </div>
+              <div class="grid grid-cols-2 gap-3">
+                <div><label class="block text-xs text-gray-400 mb-1">Phạm vi (CN)</label><input type="text" id="field_attack_range" class="w-full bg-gray-950 border border-gray-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-blue-500 transition-all" /></div>
+                <div><label class="block text-xs text-gray-400 mb-1">Phạm vi (VN)</label><input type="text" id="field_attack_range_vn" class="w-full bg-gray-950 border border-gray-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-blue-500 transition-all" /></div>
+              </div>
+              <div class="grid grid-cols-2 gap-3">
+                <div><label class="block text-xs text-gray-400 mb-1">Thi triển (CN)</label><input type="text" id="field_cast_method" class="w-full bg-gray-950 border border-gray-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-blue-500 transition-all" /></div>
+                <div><label class="block text-xs text-gray-400 mb-1">Thi triển (VN)</label><input type="text" id="field_cast_method_vn" class="w-full bg-gray-950 border border-gray-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-blue-500 transition-all" /></div>
+              </div>
+              <div class="grid grid-cols-2 gap-3">
+                <div><label class="block text-xs text-gray-400 mb-1">Thú cưng (CN)</label><input type="text" id="field_pet_usable" class="w-full bg-gray-950 border border-gray-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-blue-500 transition-all" /></div>
+                <div><label class="block text-xs text-gray-400 mb-1">Thú cưng (VN)</label><input type="text" id="field_pet_usable_vn" class="w-full bg-gray-950 border border-gray-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-blue-500 transition-all" /></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Effects -->
+          <div>
+            <h3 class="text-sm font-semibold text-gray-300 mb-3 uppercase tracking-wider">Hiệu ứng</h3>
+            <div class="grid grid-cols-2 gap-3">
+              <div><label class="block text-xs text-gray-400 mb-1">Ảo ảnh phụ</label><input type="number" id="field_phantom_side_effect" value="0" class="w-full bg-gray-950 border border-gray-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-blue-500 transition-all" /></div>
+              <div><label class="block text-xs text-gray-400 mb-1">Hiệu ứng bản đồ</label><input type="number" id="field_map_effect" value="0" class="w-full bg-gray-950 border border-gray-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-blue-500 transition-all" /></div>
+              <div class="col-span-2"><label class="block text-xs text-gray-400 mb-1">Tác dụng phụ thuộc tính (VD: Lửa:-30,Thủy:-20)</label><input type="text" id="field_side_effects" placeholder="Lửa:-30,Thủy:-20" class="w-full bg-gray-950 border border-gray-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-blue-500 transition-all" /></div>
+            </div>
+          </div>
+
+          <!-- Descriptions -->
+          <div>
+            <h3 class="text-sm font-semibold text-gray-300 mb-3 uppercase tracking-wider">Mô tả</h3>
+            <div class="space-y-3">
+              <div><label class="block text-xs text-gray-400 mb-1">Mô tả ngắn (CN)</label><textarea id="field_description" rows="2" class="w-full bg-gray-950 border border-gray-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-blue-500 transition-all resize-none"></textarea></div>
+              <div><label class="block text-xs text-gray-400 mb-1">Mô tả ngắn (VN)</label><textarea id="field_description_vn" rows="2" class="w-full bg-gray-950 border border-gray-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-blue-500 transition-all resize-none"></textarea></div>
+              <div><label class="block text-xs text-gray-400 mb-1">Hiệu ứng kỹ năng (CN)</label><textarea id="field_skill_effect" rows="4" class="w-full bg-gray-950 border border-gray-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-blue-500 transition-all resize-none"></textarea></div>
+              <div><label class="block text-xs text-gray-400 mb-1">Hiệu ứng kỹ năng (VN)</label><textarea id="field_skill_effect_vn" rows="4" class="w-full bg-gray-950 border border-gray-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-blue-500 transition-all resize-none"></textarea></div>
+            </div>
+          </div>
+
+          <!-- Image -->
+          <div>
+            <h3 class="text-sm font-semibold text-gray-300 mb-3 uppercase tracking-wider">Hình ảnh</h3>
+            <div><label class="block text-xs text-gray-400 mb-1">Đường dẫn ảnh (tùy chọn)</label><input type="text" id="field_image" placeholder="images/cards/card_670.png" class="w-full bg-gray-950 border border-gray-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-blue-500 transition-all" /></div>
+          </div>
+
+          <!-- Actions -->
+          <div class="flex gap-3 pt-2">
+            <button type="submit" id="btnSave" class="flex-1 px-4 py-2 bg-blue-600 hover:bg-blue-500 rounded-lg text-sm font-medium transition-colors">Lưu thẻ</button>
+            <button type="button" onclick="resetForm()" class="px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded-lg text-sm font-medium transition-colors">Hủy</button>
+            <button type="button" id="btnDelete" onclick="deleteCard()" class="hidden px-4 py-2 bg-red-700 hover:bg-red-600 rounded-lg text-sm font-medium transition-colors">Xóa thẻ</button>
+          </div>
+        </form>
+      </div>
+
+      <!-- Right Panel: Preview + List -->
+      <div class="flex-1 flex flex-col gap-4 min-h-0">
+        <!-- Live Preview -->
+        <div class="bg-gray-900 border border-gray-800 rounded-xl p-4">
+          <h3 class="text-sm font-semibold text-gray-300 mb-3 uppercase tracking-wider">Xem trước</h3>
+          <div id="livePreview" class="fade-in">
+            <div class="text-center text-gray-500 py-10">
+              <div class="text-3xl mb-2">👁️</div>
+              <p>Điền thông tin thẻ để xem trước</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- All Cards List -->
+        <div class="bg-gray-900 border border-gray-800 rounded-xl p-4 flex-1 flex flex-col min-h-0">
+          <h3 class="text-sm font-semibold text-gray-300 mb-3 uppercase tracking-wider">Danh sách thẻ <span id="allCardCount" class="text-yellow-400">0</span></h3>
+          <div id="localCardsList" class="flex-1 overflow-y-auto bg-gray-950 rounded-lg">
+            <div class="text-gray-500 text-sm text-center py-8">Đang tải...</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ===== DATA & STATE =====
+    let baseCards = [];
+    let customCards = [];
+    let allCards = [];        // merged base + custom (custom overrides base)
+    let editingId = null;
+
+    // ===== INITIALIZATION =====
+    async function init() {
+      // Load base cards from JSON
+      try {
+        const res = await fetch('data/cards.json');
+        if (res.ok) {
+          const data = await res.json();
+          baseCards = data.cards || [];
+        }
+      } catch (e) { console.warn('Could not load base cards', e); }
+
+      // Load custom cards from localStorage
+      try {
+        const raw = localStorage.getItem('card_editor_custom');
+        if (raw) customCards = JSON.parse(raw);
+      } catch (e) { console.warn('Could not parse localStorage cards', e); }
+
+      rebuildAllCards();
+      renderLocalCardsList();
+      updatePreview();
+      bindFormListeners();
+    }
+
+    function rebuildAllCards() {
+      const map = new Map(baseCards.map(c => [c.id, c]));
+      customCards.forEach(c => map.set(c.id, c));
+      allCards = Array.from(map.values());
+      allCards.sort((a, b) => a.id - b.id);
+    }
+
+    function isCustomCard(id) {
+      return customCards.some(c => c.id === id);
+    }
+
+    // ===== FORM HELPERS =====
+    function getField(id) { return document.getElementById('field_' + id); }
+    function getVal(id) {
+      const el = getField(id);
+      if (!el) return 0;
+      if (el.type === 'number') return el.value === '' ? 0 : parseFloat(el.value);
+      return el.value.trim();
+    }
+    function setVal(id, val) {
+      const el = getField(id);
+      if (el) el.value = val;
+    }
+
+    function buildCardFromForm() {
+      return {
+        id: parseInt(getVal('id')) || 0,
+        name_cn: getVal('name_cn'),
+        name_vn: getVal('name_vn'),
+        rarity: getVal('rarity'),
+        description: getVal('description'),
+        description_vn: getVal('description_vn'),
+        pet_usable: getVal('pet_usable'),
+        pet_usable_vn: getVal('pet_usable_vn'),
+        card_number: getVal('card_number'),
+        cost: getVal('cost'),
+        sp_cost: getVal('sp_cost'),
+        attack_point_cost: getVal('attack_point_cost'),
+        min_level: getVal('min_level'),
+        cooldown: getVal('cooldown'),
+        warmup: getVal('warmup'),
+        attack_attribute: getVal('attack_attribute'),
+        attack_attribute_vn: getVal('attack_attribute_vn'),
+        attack_domain: getVal('attack_domain'),
+        attack_domain_vn: getVal('attack_domain_vn'),
+        attack_range: getVal('attack_range'),
+        attack_range_vn: getVal('attack_range_vn'),
+        cast_method: getVal('cast_method'),
+        cast_method_vn: getVal('cast_method_vn'),
+        phantom_side_effect: getVal('phantom_side_effect'),
+        map_effect: getVal('map_effect'),
+        side_effects: parseSideEffects(getVal('side_effects')),
+        skill_effect: getVal('skill_effect'),
+        skill_effect_vn: getVal('skill_effect_vn'),
+        image: getVal('image')
+      };
+    }
+
+    function populateForm(card) {
+      setVal('id', card.id);
+      setVal('name_cn', card.name_cn || '');
+      setVal('name_vn', card.name_vn || '');
+      setVal('rarity', card.rarity || '');
+      setVal('description', card.description || '');
+      setVal('description_vn', card.description_vn || '');
+      setVal('pet_usable', card.pet_usable || '');
+      setVal('pet_usable_vn', card.pet_usable_vn || '');
+      setVal('card_number', card.card_number || '');
+      setVal('cost', card.cost ?? 0);
+      setVal('sp_cost', card.sp_cost ?? 0);
+      setVal('attack_point_cost', card.attack_point_cost ?? 0);
+      setVal('min_level', card.min_level ?? 0);
+      setVal('cooldown', card.cooldown ?? 0);
+      setVal('warmup', card.warmup ?? 0);
+      setVal('attack_attribute', card.attack_attribute || '');
+      setVal('attack_attribute_vn', card.attack_attribute_vn || '');
+      setVal('attack_domain', card.attack_domain || '');
+      setVal('attack_domain_vn', card.attack_domain_vn || '');
+      setVal('attack_range', card.attack_range || '');
+      setVal('attack_range_vn', card.attack_range_vn || '');
+      setVal('cast_method', card.cast_method || '');
+      setVal('cast_method_vn', card.cast_method_vn || '');
+      setVal('phantom_side_effect', card.phantom_side_effect ?? 0);
+      setVal('map_effect', card.map_effect ?? 0);
+      setVal('side_effects', stringifySideEffects(card.side_effects) || '');
+      setVal('skill_effect', card.skill_effect || '');
+      setVal('skill_effect_vn', card.skill_effect_vn || '');
+      setVal('image', card.image || '');
+    }
+
+    function parseSideEffects(str) {
+      if (!str || !str.trim()) return {};
+      const result = {};
+      str.split(',').forEach(pair => {
+        const [key, val] = pair.split(':');
+        if (key && val !== undefined) {
+          result[key.trim()] = parseFloat(val.trim());
+        }
+      });
+      return result;
+    }
+
+    function stringifySideEffects(obj) {
+      if (!obj || typeof obj !== 'object' || Object.keys(obj).length === 0) return '';
+      return Object.entries(obj).map(([k, v]) => k.trim() + ':' + v).join(',');
+    }
+
+    function clearForm() {
+      document.getElementById('cardForm').reset();
+      document.getElementById('field_id').value = '';
+      editingId = null;
+      updateModeUI();
+      hideError();
+      updatePreview();
+    }
+
+    function resetForm() {
+      clearForm();
+    }
+
+    // ===== VALIDATION =====
+    function validate() {
+      const errors = [];
+      const idVal = parseInt(getVal('id'));
+      if (!idVal || idVal < 1) errors.push('ID phải là số nguyên dương.');
+      if (!getVal('name_cn')) errors.push('Tên tiếng Trung là bắt buộc.');
+      if (!getVal('name_vn')) errors.push('Tên tiếng Việt là bắt buộc.');
+      if (!getVal('rarity')) errors.push('Độ hiếm là bắt buộc.');
+
+      // Check duplicate ID when adding new
+      if (!editingId && customCards.some(c => c.id === idVal)) {
+        errors.push('ID thẻ đã tồn tại. Vui lòng chọn ID khác hoặc chuyển sang chế độ chỉnh sửa.');
+      }
+      // Check duplicate ID when editing (different card has same ID)
+      if (editingId && editingId !== idVal && customCards.some(c => c.id === idVal)) {
+        errors.push('ID thẻ đã được sử dụng bởi thẻ khác.');
+      }
+
+      return errors;
+    }
+
+    function showError(msgs) {
+      const banner = document.getElementById('errorBanner');
+      banner.innerHTML = msgs.map(m => '<div>• ' + escapeHtml(m) + '</div>').join('');
+      banner.classList.remove('hidden');
+    }
+    function hideError() {
+      document.getElementById('errorBanner').classList.add('hidden');
+    }
+
+    // ===== SAVE / UPDATE / DELETE =====
+    function saveCard() {
+      hideError();
+      const errors = validate();
+      if (errors.length > 0) { showError(errors); return; }
+
+      const card = buildCardFromForm();
+
+      if (editingId) {
+        // Update existing
+        const idx = customCards.findIndex(c => c.id === editingId);
+        if (idx >= 0) {
+          customCards[idx] = card;
+        } else {
+          customCards.push(card);
+        }
+      } else {
+        customCards.push(card);
+      }
+
+      saveToStorage();
+      rebuildAllCards();
+      renderLocalCardsList();
+      clearForm();
+    }
+
+    function deleteCard() {
+      if (!editingId) return;
+      if (!isCustomCard(editingId)) {
+        alert('Không thể xóa thẻ gốc. Chỉ có thể xóa thẻ custom.');
+        return;
+      }
+      if (!confirm('Bạn có chắc muốn xóa thẻ #' + editingId + '?')) return;
+
+      customCards = customCards.filter(c => c.id !== editingId);
+      saveToStorage();
+      rebuildAllCards();
+      renderLocalCardsList();
+      clearForm();
+    }
+
+    function saveToStorage() {
+      try {
+        localStorage.setItem('card_editor_custom', JSON.stringify(customCards));
+      } catch (e) {
+        alert('Bộ nhớ trình duyệt đầy. Hãy xuất JSON và xóa bớt thẻ.');
+      }
+    }
+
+    // ===== ALL CARDS LIST =====
+    function renderLocalCardsList() {
+      const container = document.getElementById('localCardsList');
+      document.getElementById('allCardCount').textContent = allCards.length;
+
+      if (allCards.length === 0) {
+        container.innerHTML = '<div class="text-gray-500 text-sm text-center py-8">Chưa có thẻ nào.</div>';
+        return;
+      }
+
+      const rows = allCards.map(card => {
+        const custom = isCustomCard(card.id);
+        return `
+        <div class="flex items-center justify-between p-3 border-b border-gray-800 hover:bg-gray-800/50 transition-colors ${editingId === card.id ? 'bg-blue-900/20 border-l-2 border-l-blue-400' : ''}">
+          <div class="flex items-center gap-3">
+            <span class="text-xs text-gray-500 font-mono">#${card.id}</span>
+            ${card.card_number ? `<span class="text-xs text-yellow-400 font-mono font-bold">[${escapeHtml(card.card_number)}]</span>` : ''}
+            <span class="text-sm font-semibold text-white">${escapeHtml(card.name_cn)}</span>
+            <span class="text-xs text-gray-400">${escapeHtml(card.name_vn)}</span>
+            <span class="px-1.5 py-0.5 rounded text-[10px] font-bold rarity-${card.rarity}">${card.rarity}</span>
+            ${custom ? '<span class="px-1 py-0.5 rounded text-[10px] bg-emerald-900/40 text-emerald-400 border border-emerald-800">custom</span>' : ''}
+          </div>
+          <div class="flex gap-2">
+            <button onclick="editCard(${card.id})" class="px-2 py-1 bg-blue-900/40 hover:bg-blue-900/60 rounded text-xs text-blue-300 transition-colors">Sửa</button>
+            ${custom ? `<button onclick="removeCard(${card.id})" class="px-2 py-1 bg-red-900/40 hover:bg-red-900/60 rounded text-xs text-red-300 transition-colors">Xóa</button>` : ''}
+          </div>
+        </div>
+      `;
+      }).join('');
+
+      container.innerHTML = '<div class="divide-y divide-gray-800">' + rows + '</div>';
+    }
+
+    function editCard(id) {
+      const card = allCards.find(c => c.id === id);
+      if (!card) return;
+      editingId = id;
+      populateForm(card);
+      updateModeUI();
+      hideError();
+      updatePreview();
+      renderLocalCardsList(); // re-render to show selection highlight
+      // Scroll to top of form
+      document.querySelector('.w-\[55\%\]').scrollTop = 0;
+    }
+
+    function removeCard(id) {
+      if (!isCustomCard(id)) {
+        alert('Không thể xóa thẻ gốc. Chỉ có thể xóa thẻ custom.');
+        return;
+      }
+      if (!confirm('Bạn có chắc muốn xóa thẻ #' + id + '?')) return;
+      customCards = customCards.filter(c => c.id !== id);
+      saveToStorage();
+      rebuildAllCards();
+      renderLocalCardsList();
+      if (editingId === id) clearForm();
+    }
+
+    function removeCard(id) {
+      if (!confirm('Bạn có chắc muốn xóa thẻ #' + id + '?')) return;
+      customCards = customCards.filter(c => c.id !== id);
+      saveToStorage();
+      renderLocalCardsList();
+      if (editingId === id) clearForm();
+    }
+
+    function updateModeUI() {
+      const title = document.getElementById('modeTitle');
+      const subtitle = document.getElementById('modeSubtitle');
+      const btnDelete = document.getElementById('btnDelete');
+      const btnSave = document.getElementById('btnSave');
+
+      if (editingId) {
+        title.textContent = 'Chỉnh sửa thẻ #' + editingId;
+        subtitle.textContent = 'Cập nhật thông tin thẻ và nhấn Lưu.';
+        btnDelete.classList.remove('hidden');
+        btnSave.textContent = 'Cập nhật thẻ';
+      } else {
+        title.textContent = 'Thêm thẻ mới';
+        subtitle.textContent = 'Điền thông tin thẻ bên dưới và nhấn Lưu.';
+        btnDelete.classList.add('hidden');
+        btnSave.textContent = 'Lưu thẻ';
+      }
+    }
+
+    // ===== LIVE PREVIEW =====
+    function bindFormListeners() {
+      const form = document.getElementById('cardForm');
+      form.addEventListener('input', () => { hideError(); updatePreview(); });
+      form.addEventListener('change', () => { hideError(); updatePreview(); });
+    }
+
+    function updatePreview() {
+      const card = buildCardFromForm();
+      // Only render if at least name or id is present
+      if (!card.name_cn && !card.id) {
+        document.getElementById('livePreview').innerHTML = `
+          <div class="text-center text-gray-500 py-10">
+            <div class="text-3xl mb-2">👁️</div>
+            <p>Điền thông tin thẻ để xem trước</p>
+          </div>`;
+        return;
+      }
+      document.getElementById('livePreview').innerHTML = renderCardDetailHTML(card);
+    }
+
+    function renderSideEffectsTags(sideEffects) {
+      if (!sideEffects || Object.keys(sideEffects).length === 0) return '';
+      const tags = Object.entries(sideEffects).map(([name, val]) => {
+        const numVal = parseFloat(val);
+        const colorClass = numVal < 0 ? 'text-red-400 border-red-400/50' : 'text-emerald-400 border-emerald-400/50';
+        const prefix = numVal > 0 ? '+' : '';
+        return `<span class="inline-block px-2 py-1 rounded-md text-xs font-medium bg-gray-800 border ${colorClass}">${escapeHtml(name)}: ${prefix}${val}</span>`;
+      }).join('');
+      return `<div class="mb-4"><div class="text-xs text-gray-500 mb-2 uppercase tracking-wider">Tác dụng phụ thuộc tính</div><div class="flex flex-wrap gap-2">${tags}</div></div>`;
+    }
+
+    // Reuses the same rendering logic as card-viewer.html
+    function renderCardDetailHTML(card) {
+      const hasImage = card.image && card.image.trim() !== '';
+      const imgHtml = hasImage
+        ? `<img src="${escapeHtml(card.image)}" alt="${escapeHtml(card.name_vn)}" class="w-full max-w-sm mx-auto rounded-xl border-2 border-gray-700" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">`
+        : '';
+
+      const placeholderHtml = `
+        <div class="placeholder-card w-full max-w-sm mx-auto rounded-xl border-2 border-gray-700 bg-gradient-to-b from-gray-800 to-gray-900 flex flex-col items-center justify-center py-12 ${hasImage ? 'hidden' : ''}">
+          <div class="text-5xl mb-2">🃏</div>
+          <div class="text-lg font-bold text-gray-300">${escapeHtml(card.name_cn) || 'Thẻ chưa đặt tên'}</div>
+          <div class="text-sm text-gray-500">${escapeHtml(card.name_vn)}</div>
+        </div>
+      `;
+
+      const effectsHtml = [];
+      if ((card.phantom_side_effect || 0) !== 0) {
+        effectsHtml.push(`<div class="flex justify-between py-2 px-3 bg-gray-950/30 rounded-lg border border-gray-800/50"><span class="text-sm text-gray-400">Ảo ảnh phụ</span><span class="text-sm font-semibold ${card.phantom_side_effect > 0 ? 'text-emerald-400' : 'text-red-400'}">${card.phantom_side_effect > 0 ? '+' : ''}${card.phantom_side_effect}</span></div>`);
+      }
+      if ((card.map_effect || 0) !== 0) {
+        effectsHtml.push(`<div class="flex justify-between py-2 px-3 bg-gray-950/30 rounded-lg border border-gray-800/50"><span class="text-sm text-gray-400">Hiệu ứng bản đồ</span><span class="text-sm font-semibold ${card.map_effect > 0 ? 'text-emerald-400' : 'text-red-400'}">${card.map_effect > 0 ? '+' : ''}${card.map_effect}</span></div>`);
+      }
+
+      return `
+        <div class="fade-in">
+          <div class="mb-6">${imgHtml}${placeholderHtml}</div>
+          <div class="text-center mb-6">
+            ${card.card_number ? `<div class="text-sm text-gray-500 mb-1">Số thẻ: <span class="text-yellow-400 font-mono font-bold">${escapeHtml(card.card_number)}</span></div>` : ''}
+            <h1 class="text-2xl font-bold text-white">${escapeHtml(card.name_vn) || 'Tên tiếng Việt'}</h1>
+            <p class="text-sm text-gray-400 mt-1">${escapeHtml(card.name_cn) || 'Tên tiếng Trung'}</p>
+            <span class="inline-block mt-3 px-4 py-1 rounded-full text-sm font-bold rarity-${card.rarity || 'E'}">${card.rarity || '-'}</span>
+            ${(card.pet_usable_vn || card.pet_usable) ? `<div class="mt-3 text-sm"><span class="text-gray-500">Thú cưng:</span> <span class="text-amber-400 font-medium">${escapeHtml(card.pet_usable_vn || card.pet_usable)}</span></div>` : ''}
+          </div>
+          <div class="grid grid-cols-2 gap-3 mb-6">
+            <div class="bg-gray-950 border border-gray-800 rounded-lg p-3"><div class="text-xs text-gray-500 mb-1">Cost</div><div class="text-lg font-bold text-white">${(card.cost ?? 0).toFixed(2)}</div></div>
+            <div class="bg-gray-950 border border-gray-800 rounded-lg p-3"><div class="text-xs text-gray-500 mb-1">SP Tiêu hao</div><div class="text-lg font-bold text-white">${card.sp_cost ?? 0}</div></div>
+            <div class="bg-gray-950 border border-gray-800 rounded-lg p-3"><div class="text-xs text-gray-500 mb-1">Điểm PP</div><div class="text-lg font-bold text-white">${card.attack_point_cost ?? 0}</div></div>
+            <div class="bg-gray-950 border border-gray-800 rounded-lg p-3"><div class="text-xs text-gray-500 mb-1">Cấp tối thiểu</div><div class="text-lg font-bold text-white">${card.min_level ?? 0}</div></div>
+            <div class="bg-gray-950 border border-gray-800 rounded-lg p-3"><div class="text-xs text-gray-500 mb-1">Hồi chiêu</div><div class="text-lg font-bold text-white">${card.cooldown ?? 0}</div></div>
+            <div class="bg-gray-950 border border-gray-800 rounded-lg p-3"><div class="text-xs text-gray-500 mb-1">Khởi động</div><div class="text-lg font-bold text-white">${card.warmup ?? 0}</div></div>
+          </div>
+          <div class="bg-gray-950 border border-gray-800 rounded-lg p-4 mb-6 space-y-2">
+            <div class="flex justify-between"><span class="text-sm text-gray-400">Thuộc tính tấn công</span><span class="text-sm font-semibold text-white">${escapeHtml(card.attack_attribute_vn)} <span class="text-gray-500">(${escapeHtml(card.attack_attribute)})</span></span></div>
+            <div class="flex justify-between"><span class="text-sm text-gray-400">Lĩnh vực tấn công</span><span class="text-sm font-semibold text-white">${escapeHtml(card.attack_domain_vn)} <span class="text-gray-500">(${escapeHtml(card.attack_domain)})</span></span></div>
+            <div class="flex justify-between"><span class="text-sm text-gray-400">Phạm vi tấn công</span><span class="text-sm font-semibold text-white">${escapeHtml(card.attack_range_vn)}</span></div>
+            <div class="flex justify-between"><span class="text-sm text-gray-400">Phương thức thi triển</span><span class="text-sm font-semibold text-white">${escapeHtml(card.cast_method_vn)}</span></div>
+          </div>
+          ${effectsHtml.length > 0 ? `<div class="space-y-2 mb-6">${effectsHtml.join('')}</div>` : ''}
+          ${renderSideEffectsTags(card.side_effects)}
+          <div class="bg-gray-950 border border-gray-800 rounded-lg p-4">
+            <div class="text-xs text-gray-500 mb-2 uppercase tracking-wider">Hiệu ứng kỹ năng</div>
+            <p class="text-sm text-gray-300 leading-relaxed">${escapeHtml(card.skill_effect_vn || card.skill_effect) || 'Chưa có mô tả.'}</p>
+          </div>
+        </div>
+      `;
+    }
+
+    // ===== EXPORT JSON =====
+    async function exportJSON() {
+      let merged = [];
+      try {
+        const res = await fetch('data/cards.json');
+        if (res.ok) {
+          const data = await res.json();
+          merged = data.cards || [];
+        }
+      } catch (e) { /* ignore */ }
+
+      const map = new Map(merged.map(c => [c.id, c]));
+      customCards.forEach(c => map.set(c.id, c));
+      const all = Array.from(map.values()).sort((a, b) => a.id - b.id);
+
+      const blob = new Blob([JSON.stringify({ cards: all }, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'cards_merged.json';
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+
+    // ===== UTILS =====
+    function escapeHtml(str) {
+      if (str === null || str === undefined) return '';
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+    }
+
+    // Start
+    init();
+  </script>
+</body>
+</html>
